@@ -1,65 +1,112 @@
-#2024-08-25 01:13:47
+#2024-09-09 15:33:27
+
 import requests
-import os
-import time
 import random
-import hashlib
-class yuanshen():
- def __init__(self,cookie):
-  self.cookie=cookie
-  self.h={"Host":"app.zhuanbang.net","accept":"application/json, image/webp","user-agent":"Mozilla/5.0 (Linux; Android 12; M2104K10AC Build/SP1A.210812.016; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/96.0.4664.104 Mobile Safari/537.36 HuoNiuFusion/1.25.0_231652","x-requested-with":"XMLHttpRequest","sec-fetch-site":"same-origin","sec-fetch-mode":"cors","sec-fetch-dest":"empty","referer":"https://app.zhuanbang.net/assist/activity/47","accept-language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7","accept-encoding":"gzip","Cookie":f"NiuToken={self.cookie}"}
- def sign_(self):
-  d=f"{self.csrftoken}#{self.sessionId}#{self.time}"
-  byte_string=d.encode('utf-8')
-  sha1=hashlib.sha1()
-  sha1.update(byte_string)
-  sign=sha1.hexdigest()
-  return sign
- def video(self,key):
-  i=0
-  while True:
-   i+=1
-   url=f"https://app.zhuanbang.net/{key}/launch?_random={int(time.time() * 1000)}&type=slide"
-   r=requests.get(url,headers=self.h).json()
-   if r['code']==0:
-    print(f"第[{i}]个红包获取信息成功")
-    self.csrftoken=r['data']['extArgs']['csrfToken']
-    self.sessionId=r['data']['extArgs']['sessionId']
-    self.time=int(time.time())
-    url=f"https://app.zhuanbang.net/{key}/award/grant?_t={self.time}"
-    data={"csrfToken":f"{self.csrftoken}","deviceId":f"{self.sessionId}","timestamp":f"{self.time}","sign":f"{self.sign_()}"}
-    r=requests.post(url,headers=self.h,data=data).json()
-    if r['code']==0:
-     print(f"第[{i}]个红包领取成功,获得[{r['data']['awardMoney']}]元")
+import time
+import re
+cookies = {
+    "PHPSESSID": "vj9no9pg5n2leckto1epccatj1"
+}
+def info(bianhao):
+    headers = {
+        "Host": "app.qihuangxueshe.com",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (Linux; Android 11; Redmi K30i 5G Build/RKQ1.200826.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.188 Mobile Safari/537.36 XWEB/1260117 MMWEBSDK/20240501 MMWEBID/5594 MicroMessenger/8.0.50.2701(0x2800325A) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "X-Requested-With": "com.tencent.mm",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-User": "?1",
+        "Sec-Fetch-Dest": "document",
+        "sec-ch-ua": "Not/A)Brand;v=8, Chromium;v=126, Android",
+        "sec-ch-ua-mobile": "?1",
+        "sec-ch-ua-platform": "Android",
+        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+    }
+    
+    url = f'https://app.qihuangxueshe.com/ky/{bianhao}/29/371816'
+    response = requests.get(url,headers=headers, cookies=cookies)
+    if response.status_code == 200:
+        print('获取课程成功')
+        answer = re.search(r'let answerIndex =[ ]*(\d)',response.text).group(1)
+        return answer
     else:
-     print(f"第[{i}]个红包领取失败---[{r['msg']}]")
-     break
-   else:
-    print(f"第[{i}]个获取红包信息失败---[{r['msg']}]")
-    break
-   if i>=21:
-    break
-   time.sleep(random.randint(20,48))
- def main(self):
-  print("===========开始执行快手刷视频===========")
-  self.video("kwai_video")
-  print("===========快手刷视频执行完毕===========")
-  print("===========开始执行抖音刷视频===========")
-  self.video("pangle_video")
-  print("===========抖音刷视频执行完毕===========")
-if __name__=='__main__':
- cookie=''
- if not cookie:
-  cookie=os.getenv("yuanshen_zb")
-  if not cookie:
-   print("⛔️请设置环境变量:yuanshen_zb")
-   exit()
- cookies=cookie.split("@")
- print(f"一共获取到{len(cookies)}个账号")
- i=1
- for cookie in cookies:
-  print(f"\n--------开始第{i}个账号--------")
-  main=yuanshen(cookie)
-  main.main()
-  print(f"--------第{i}个账号执行完毕--------")
-  i+=1
+        print('获取课程失败，请检查所填链接是否有误')
+        exit()
+
+class ky():
+    def __init__(self,userid,cookies,answer,bianhao) -> None:
+        self.userid = userid
+        self.cookies = cookies
+        self.answer = answer
+        self.bianhao = bianhao
+        self.headers = {
+            "Host": "app.qihuangxueshe.com",
+            "Connection": "keep-alive",
+            "Content-Length": "45",
+            "sec-ch-ua": "Not/A)Brand;v=8, Chromium;v=126, Android",
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+            "sec-ch-ua-mobile": "?1",
+            "User-Agent": "Mozilla/5.0 (Linux; Android 11; Redmi K30i 5G Build/RKQ1.200826.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.188 Mobile Safari/537.36 XWEB/1260117 MMWEBSDK/20240501 MMWEBID/5594 MicroMessenger/8.0.50.2701(0x2800325A) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64",
+            "sec-ch-ua-platform": "Android",
+            "Origin": "https://app.qihuangxueshe.com",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Dest": "empty",
+            "Referer": f"https://app.qihuangxueshe.com/ky/{self.bianhao}/29/{self.userid}",
+            "Accept-Encoding": "gzip, deflate, br, zstd",
+            "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+        }
+        self.to_answer()
+
+    def to_answer(self):
+        data = {
+            "bianhao": self.bianhao,
+            "us_id": self.userid,
+            "kefu": "29",
+            "ti_da": self.answer
+        }
+        url = 'https://app.qihuangxueshe.com/api/ky_vod.php?qh_type=kaiban_dati'
+        response = requests.post(url,headers=self.headers, cookies=self.cookies, data=data)
+        if response.json().get('kaiban_dati') == "1":
+            print('回答正确')
+            time.sleep(2)
+            self.get_hongbao()
+        else:
+            print(f"回答错误：{response.json()}")
+
+    def get_hongbao(self):
+        data = {
+            "bianhao": self.bianhao,
+            "us_id": self.userid,
+            "kefu": self.answer
+        }
+        url = 'https://app.qihuangxueshe.com/api/ky_vod.php?qh_type=kaiban_hongbao'
+        response = requests.post(url,headers=self.headers, cookies=self.cookies, data=data)
+        if response.json().get('kaiban_hongbao') == 1:
+            print('红包领取成功')
+        else:
+            print(f"红包领取失败：{response.json()}")
+
+
+if __name__ in "__main__":
+    if user_id == '':
+        print('请填写user_id')
+        exit()
+    bianhao = re.search(r'app\.qihuangxueshe\.com\/ky\/(\w+)\/29',link).group(1)
+    userid = user_id+'@378344@379989'
+    answer = info(bianhao)
+    userids = userid.split('@')
+    print(f'共有{len(userids)}个账号')
+    for i,userid in enumerate(userids):
+        print(f'----------开始第{i+1}个账号----------')
+        try:
+            ky(userid,cookies,answer,bianhao)
+        except:
+            pass
+        print(f'----------结束第{i+1}个账号----------')
+        time.sleep(random.randint(10,20))
